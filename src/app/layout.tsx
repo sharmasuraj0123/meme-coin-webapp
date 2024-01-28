@@ -35,7 +35,7 @@ export default function RootLayout({
               <img
                 alt="PION Logo"
                 className="h-16 w-auto"
-                src="/pion.png"
+                src="/Pion-logo.png"
               />
             </h1>
             <ul>
