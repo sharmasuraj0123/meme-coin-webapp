@@ -1,4 +1,4 @@
-export function ActivityIcon(props) {
+export function ActivityIcon(props:any) {
     return (
       <svg
         {...props}

@@ -1,4 +1,4 @@
-export function LayoutDashboardIcon(props) {
+export function LayoutDashboardIcon(props:any) {
     return (
       <svg
         {...props}

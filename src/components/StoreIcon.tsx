@@ -1,4 +1,4 @@
-export function StoreIcon(props) {
+export function StoreIcon(props:any) {
     return (
       <svg
         {...props}
