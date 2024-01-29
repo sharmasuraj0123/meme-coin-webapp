@@ -4,6 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CardTitle, CardContent, Card } from "@/components/ui/card";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import {
   TooltipTrigger,
   TooltipContent,
@@ -45,6 +46,7 @@ export default function RootLayout({
         <meta name="description" content="Finance for i-Gaming Ventures" />
       </head>
       <body className={inter.className}>
+      <SpeedInsights/>
         <WagmiConfig config={config}>
           <ConnectKitProvider>
             <div key="1" className="bg-white flex min-h-screen">
