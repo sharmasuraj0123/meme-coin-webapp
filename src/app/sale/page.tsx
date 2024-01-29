@@ -1,9 +1,48 @@
-import ComingSoon from "@/components/ComingSoon";
+"use client";
 import { LockIcon } from "@/components/LockIcon";
+import { PlaceHolderTimer } from "@/components/PlaceHolderTimer";
+import { Timer } from "@/components/Timer";
+import { useEffect, useState } from "react";
+
+export interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
 
 export default function Page() {
-    return (
-        <div className="grow relative h-screen overflow-hidden">
+  const calculateTimeLeft = (targetDate: string) => {
+    const target = new Date(targetDate);
+    const difference = +target - +new Date();
+
+    let timeDiff = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+
+    if (difference > 0) {
+      timeDiff = {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      };
+    }
+
+    return timeDiff;
+  };
+
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft(calculateTimeLeft("2024-2-05"));
+    }, 1000);
+
+    // Clear the interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="grow relative h-screen overflow-hidden">
       <img
         alt="Background"
         className="absolute inset-0 object-cover w-full h-full filter blur-[4px]"
@@ -20,21 +59,9 @@ export default function Page() {
         <LockIcon className="h-24 w-24 mb-8 animate-pulse" />
         <h1 className="text-6xl font-bold animate-pulse">Unlocking Soon</h1>
         <p className="text-xl mt-2">Stay Tuned for Token Sale!</p>
-        <div className="flex items-center justify-center mt-8 space-x-8 text-4xl font-mono animate-pulse">
-          <div>
-            <span className="font-bold">23</span>
-            <span className="text-base font-normal">HRS</span>
-          </div>
-          <div>
-            <span className="font-bold">59</span>
-            <span className="text-base font-normal">MIN</span>
-          </div>
-          <div>
-            <span className="font-bold">59</span>
-            <span className="text-base font-normal">SEC</span>
-          </div>
-        </div>
+        {timeLeft ? <Timer timeLeft={timeLeft} /> : <PlaceHolderTimer />}
+       
       </div>
     </div>
-      );
-  }
+  );
+}
