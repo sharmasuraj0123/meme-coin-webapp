@@ -27,7 +27,7 @@ const chains = [polygon, polygonMumbai];
 const config = createConfig(
   getDefaultConfig({
     alchemyId: process.env.ALCHEMY_ID,
-    walletConnectProjectId: process.env.WALLET_CONNECT_PROJECT_ID,
+    walletConnectProjectId: process.env.WALLET_CONNECT_PROJECT_ID || "",
     appName: "Pion",
     chains,
   })
