@@ -1,5 +1,4 @@
 "use client";
-// import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
@@ -19,17 +18,10 @@ import {
   ConnectKitButton,
   getDefaultConfig,
 } from "connectkit";
-import { configureChains, createConfig, WagmiConfig } from "wagmi";
+import { createConfig, WagmiConfig } from "wagmi";
 import { polygon, polygonMumbai } from "wagmi/chains";
-import { alchemyProvider } from "wagmi/providers/alchemy";
-import { publicProvider } from "wagmi/providers/public";
 
 const inter = Inter({ subsets: ["latin"] });
-
-// export const metadata: Metadata = {
-//   title: "PION",
-//   description: "Finance for i-Gaming Ventures",
-// };
 
 const chains = [polygon, polygonMumbai];
 const config = createConfig(
@@ -37,7 +29,7 @@ const config = createConfig(
     alchemyId: `wKz1CnWvrUAdYZYUM8Ay1qD3gQ`,
     walletConnectProjectId: `42a36e60619628a831e05121c87aab1f`,
     appName: "Pion",
-    chains
+    chains,
   })
 );
 
@@ -48,7 +40,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <head>
+        <title>Pion</title>
+        <meta name="description" content="Finance for i-Gaming Ventures" />
+      </head>
+      <body className={inter.className}>
         <WagmiConfig config={config}>
           <ConnectKitProvider>
             <div key="1" className="bg-white flex min-h-screen">
@@ -56,7 +52,7 @@ export default function RootLayout({
                 <div>
                   <h1 className="text-2xl font-bold mb-8">
                     <img
-                      alt="PION Logo"
+                      alt="PION Protocol"
                       className="h-16 w-auto"
                       src="/Pion-logo.png"
                     />
