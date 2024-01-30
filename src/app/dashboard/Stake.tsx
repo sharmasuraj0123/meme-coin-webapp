@@ -3,7 +3,7 @@ import { StakeIcon } from "@/components/StakeIcon";
 import { useAccount, useContractWrite } from "wagmi";
 
 export default function Unstake() {
-  // TODO: Integrate Staking Contract 
+  // TODO: Integrate Staking Contract supply function
 
   return (
     <Link

@@ -11,6 +11,17 @@ import Unstake from "./Unstake";
 import Stake from "./Stake";
 
 export default function Page() {
+
+  /**
+   * TODOs
+   * 1. Wallet balance = Call pion token contract balanceOf function, divided by pion token decimals
+   * 2. Your stake = Call staking contract getAmountBySupplier function, divided by pion token decimals
+   * 3. Stake calculation = getAmountBySupplier / totalTokensSupplied * 100
+   * 4. Next profit unlock = Coming Sunday - Current day of the week coundown timer (days hours min)
+   * 5. Profit = TBD 
+   * 6. Stake = call staking contract getAmountBySupplier 
+   * 7. Transaction history = Event listener code port from v1
+   */
   return (
     <div className="max-w-7xl mx-auto p-8 flex-grow">
       <div className="flex flex-col relative z-10 2xl:max-w-7xl xl:max-w-6xl lg:max-w-5xl lg:px-0 px-8 mx-auto w-full py-5 max-lg:flex-wrap">
@@ -78,7 +89,7 @@ export default function Page() {
           <Card className="col-span-1 bg-white text-[#fcecda] shadow-lg">
             <CardContent>
               <div className="flex items-center justify-between text-gray-300">
-                <CardTitle>Profit Timer</CardTitle>
+                <CardTitle>Next Profit Unlock</CardTitle>
                 <div className="flex items-center">
                   <TooltipProvider>
                     <Tooltip>

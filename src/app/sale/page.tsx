@@ -34,7 +34,7 @@ export default function Page() {
     isSuccess: isAllowanceSuccessful,
     refetch: refetchAllowance,
   } = useContractRead({
-    address: process.env.NEXT_PUBLIC_USDC_TOKEN_CONTRACT_ADDRESS as Address,
+    address: process.env.NEXT_PUBLIC_USDT_TOKEN_CONTRACT_ADDRESS as Address,
     abi: usdcTokenAbi,
     functionName: "allowance",
     args: [walletAddress, process.env.NEXT_PUBLIC_TOKEN_SALE_CONTRACT_ADDRESS],
@@ -47,7 +47,7 @@ export default function Page() {
     error: approvalError,
     write: approvalWrite,
   } = useContractWrite({
-    address: process.env.NEXT_PUBLIC_USDC_TOKEN_CONTRACT_ADDRESS as Address,
+    address: process.env.NEXT_PUBLIC_USDT_TOKEN_CONTRACT_ADDRESS as Address,
     abi: usdcTokenAbi,
     functionName: "approve",
   });
@@ -134,7 +134,7 @@ export default function Page() {
           buyPionWrite({
             args: [
               buyTokenValue *
-                Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0),
+                Number(process.env.NEXT_PUBLIC_USDT_TOKEN_DECIMAL ?? 0),
             ],
             from: walletAddress,
           } as UseContractWriteConfig);
@@ -153,13 +153,13 @@ export default function Page() {
     } else if (
       BigInt(contractApprovalAmount) >=
       BigInt(
-        buyTokenValue * Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0)
+        buyTokenValue * Number(process.env.NEXT_PUBLIC_USDT_TOKEN_DECIMAL ?? 0)
       )
     ) {
       buyPionWrite({
         args: [
           buyTokenValue *
-            Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0),
+            Number(process.env.NEXT_PUBLIC_USDT_TOKEN_DECIMAL ?? 0),
         ],
         from: walletAddress,
       } as UseContractWriteConfig);

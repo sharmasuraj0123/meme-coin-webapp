@@ -2,15 +2,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { CardTitle, CardContent, Card } from "@/components/ui/card";
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import {
-  TooltipTrigger,
-  TooltipContent,
-  Tooltip,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { LayoutDashboardIcon } from "@/components/LayoutDashboardIcon";
 import { ActivityIcon } from "@/components/ActivityIcon";
 import { StoreIcon } from "@/components/StoreIcon";
@@ -24,13 +16,24 @@ import { polygon, polygonMumbai } from "wagmi/chains";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const chains = [polygon, polygonMumbai];
+const chainEnv = process.env.NEXT_PUBLIC_CHAIN_ENV;
+
+const getChain = () => {
+  if (chainEnv === "mainnet") {
+    return polygon;
+  } else if (chainEnv === "testnet") {
+    return polygonMumbai;
+  } else {
+    return polygonMumbai;
+  }
+};
+
 const config = createConfig(
   getDefaultConfig({
     alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_ID,
     walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID || "",
     appName: "Pion",
-    chains,
+    chains: [getChain()],
   })
 );
 
@@ -46,7 +49,7 @@ export default function RootLayout({
         <meta name="description" content="Finance for i-Gaming Ventures" />
       </head>
       <body className={inter.className}>
-      <SpeedInsights/>
+        <SpeedInsights />
         <WagmiConfig config={config}>
           <ConnectKitProvider>
             <div key="1" className="bg-white flex min-h-screen">
