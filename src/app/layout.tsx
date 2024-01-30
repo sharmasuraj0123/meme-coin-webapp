@@ -27,8 +27,8 @@ const inter = Inter({ subsets: ["latin"] });
 const chains = [polygon, polygonMumbai];
 const config = createConfig(
   getDefaultConfig({
-    alchemyId: process.env.ALCHEMY_ID,
-    walletConnectProjectId: process.env.WALLET_CONNECT_PROJECT_ID || "",
+    alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_ID,
+    walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID || "",
     appName: "Pion",
     chains,
   })

@@ -1,67 +1,194 @@
+/* global BigInt */
 "use client";
-import { LockIcon } from "@/components/LockIcon";
-import { PlaceHolderTimer } from "@/components/PlaceHolderTimer";
-import { Timer } from "@/components/Timer";
-import { useEffect, useState } from "react";
 
-export interface TimeLeft {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
+import React, { useEffect, useState } from 'react';
+import { useAccount, useContractWrite, useContractRead, Address, UseContractWriteConfig } from 'wagmi';
+import { waitForTransaction } from 'wagmi/actions';
+import toast, { Toaster } from 'react-hot-toast';
+import isEmpty from 'lodash.isempty';
+
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { redirect } from 'next/navigation';
+import token_sale_abi from "@/contracts/token_sale_abi.json";
+import usdcTokenAbi from "@/contracts/usdc_token_abi.json";
+
+import { MAX_UINT256 } from '@/constants/constants';
 
 export default function Page() {
-  const calculateTimeLeft = (targetDate: string) => {
-    const target = new Date(targetDate);
-    const difference = +target - +new Date();
+  const [buyTokenValue, setBuyTokenValue] = useState(0 as number);
+  const [contractApprovalAmount, setContractApprovalAmount] = useState(BigInt(0));
+  const [walletAddress, setWalletAddress] = useState<Address | null>(null);
+  const account = useAccount();
 
-    let timeDiff = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  const {
+    data: allowanceAmount,
+    isSuccess: isAllowanceSuccessful,
+    refetch: refetchAllowance,
+  } = useContractRead({
+      address: process.env.NEXT_PUBLIC_USDC_TOKEN_CONTRACT_ADDRESS as Address,
+      abi: usdcTokenAbi,
+      functionName: 'allowance',
+      args: [walletAddress, process.env.NEXT_PUBLIC_TOKEN_SALE_CONTRACT_ADDRESS]
+  });
 
-    if (difference > 0) {
-      timeDiff = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    }
+  const {
+      data: approvalData,
+      isSuccess: approvalSuccess,
+      isError: isApprovalError,
+      error: approvalError,
+      write: approvalWrite,
+  } = useContractWrite({
+      address: process.env.NEXT_PUBLIC_USDC_TOKEN_CONTRACT_ADDRESS as Address,
+      abi: usdcTokenAbi,
+      functionName: 'approve',
+  });
 
-    return timeDiff;
-  };
-
-  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
+  const {
+      data: buyPionData,
+      isSuccess: isBuyPionSuccessful,
+      isError: isBuyPionError,
+      error: buyPionError,
+      write: buyPionWrite
+  } = useContractWrite({
+      address: process.env.NEXT_PUBLIC_TOKEN_SALE_CONTRACT_ADDRESS as Address,
+      abi: token_sale_abi,
+      functionName: 'buyPion',
+  });
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(calculateTimeLeft("2024-2-05"));
-    }, 1000);
+      if (isBuyPionSuccessful) {
+          toast.success("Buying successful!");
+          toast.custom(
+              <div className="bg-white p-4 rounded-lg shadow-md flex align-items-center">
+                  <span>Verify your transaction on {' '} <br />
+                  <a
+                      href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-500 hover:text-blue-800"
+                  >
+                      {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
+                  </a>
+                  </span>
+              </div>
+          )
+      }
+  }, [isBuyPionSuccessful, buyPionData]);
 
-    // Clear the interval on component unmount
-    return () => clearInterval(interval);
-  }, []);
+  useEffect(() => {
+      if (isBuyPionError) {
+          if (buyPionError?.message)
+              toast.error(`There was an error in the supply.\n ${buyPionError?.message}`);
+          else
+              toast.error(`There was an error in the supply.\n ${buyPionError?.message}`);
+      }
+  }, [isBuyPionError, buyPionError]);
+
+  useEffect(() => {
+      if (isApprovalError) {
+          if (approvalError?.message)
+              toast.error(`There was an error in the approval. ${approvalError?.message}`);
+          else
+              toast.error(`There was an error in the approval. ${approvalError?.message}`);
+      }
+  }, [isApprovalError, approvalError]);
+
+  useEffect(() => {
+      if (!isEmpty(account)) {
+          setWalletAddress(account?.address as Address);
+      }
+  }, [account]);
+
+  useEffect(() => {
+    if (isAllowanceSuccessful) {
+        setContractApprovalAmount(allowanceAmount as bigint);
+    }
+}, [isAllowanceSuccessful, allowanceAmount]);
+
+  useEffect(() => {
+    if (approvalSuccess) {
+      waitForTransaction({ hash: approvalData?.hash as `0x${string}` }).then((res) => {
+            refetchAllowance().then(response => {
+                setContractApprovalAmount(response.data as bigint);
+            });
+            toast.success("Contract is approved");
+            buyPionWrite({
+                args: [buyTokenValue * Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0)],
+                from: walletAddress,
+            } as UseContractWriteConfig);
+        });
+    }
+  }, [approvalSuccess, walletAddress, buyTokenValue]);
+
+  const approveUSDT = () => {
+    if (isEmpty(walletAddress) || walletAddress === undefined) {
+        toast.error("Please connect your wallet");
+    }
+    else if (buyTokenValue < 0.01) {
+        toast.error("Please enter a valid amount to Buy! Minimum amount is 0.01 USDT");
+    }
+    else if (BigInt(contractApprovalAmount) >= 
+        BigInt(buyTokenValue * Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0))) {
+        buyPionWrite({
+            args: [buyTokenValue * Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0)],
+            from: walletAddress,
+        } as UseContractWriteConfig);
+    } else {
+        approvalWrite({
+            args: [process.env.NEXT_PUBLIC_TOKEN_SALE_CONTRACT_ADDRESS,
+                MAX_UINT256],
+            from: walletAddress,
+        } as UseContractWriteConfig);
+    }
+}
 
   return (
     <div className="grow relative h-screen overflow-hidden">
-      <img
-        alt="Background"
-        className="absolute inset-0 object-cover w-full h-full filter blur-[4px]"
-        height="1080"
-        src="/SaleBackground.png"
-        style={{
-          aspectRatio: "1920/1080",
-          objectFit: "cover",
-        }}
-        width="1920"
-      />
-      <div className="absolute inset-0 bg-black/60" />
-      <div className="relative flex flex-col items-center justify-center h-full text-center text-white">
-        <LockIcon className="h-24 w-24 mb-8 animate-pulse" />
-        <h1 className="text-6xl font-bold animate-pulse">Unlocking Soon</h1>
-        <p className="text-xl mt-2">Stay Tuned for Token Sale!</p>
-        {timeLeft ? <Timer timeLeft={timeLeft} /> : <PlaceHolderTimer />}
-       
+      <Toaster />
+      <div key="1" className="max-w-7xl mx-auto p-8 flex-grow">
+      <div className="bg-white flex min-h-screen justify-center items-center p-8">
+        <div className="max-w-lg mx-auto p-12 bg-white-800 rounded-2xl shadow-2xl">
+          <div className="text-center text-grey-200">
+            <h2 className="text-4xl font-bold mb-4">
+              Buy
+              <span className="text-red-800"> $PION</span>
+            </h2>
+            <div className="mb-8 flex items-center justify-between">
+              <label className="text-2sm font-medium mb-2 p-2" htmlFor="amount">
+                Amount
+              </label>
+              <Input
+                className="w-3/5 rounded-2xl shadow-2xl placeholder-gray-400 text-black text-2xl ml-auto text-right"
+                placeholder="0"
+                type="number"
+                min="0"
+                value={buyTokenValue}
+                onChange={(e) => setBuyTokenValue(parseFloat(e.target.value))}
+              />
+              <label className="text-2sm font-medium mb-2 p-2" htmlFor="amount">
+                USDT
+              </label>
+            </div>
+            <div className="mb-8 flex items-center justify-between">
+              <label className="text-2sm font-medium p-2" htmlFor="amount">
+                You will receive
+              </label>
+              <label className="text-2sm font-bold mb-2 p-2 text-red-800 text-lg">{buyTokenValue * 100} $PION</label>
+            </div>
+            <div className="pb-4">
+            <label className="text-lg font-medium p-4 text-grey-100 mt-8">1 <span className="text-red-800">$PION</span> = 0.01 USDT</label>
+            </div>
+            <Button
+              className="w-full bg-red-800 px-8 py-4 text-2sm font-medium text-white shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-black-300 rounded"
+              onClick={() => approveUSDT()}
+              >
+              Buy Now
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
+    </div>  
   );
 }
