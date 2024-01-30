@@ -1,34 +1,26 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { CardTitle, CardContent, Card } from "@/components/ui/card"
-import { TooltipTrigger, TooltipContent, Tooltip, TooltipProvider } from "@/components/ui/tooltip"
+import { Button } from "@/components/ui/button";
+import { CardTitle, CardContent, Card } from "@/components/ui/card";
+import {
+  TooltipTrigger,
+  TooltipContent,
+  Tooltip,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
-import { StakeIcon } from "@/components/StakeIcon";
-import { UnstakeIcon } from "@/components/UnstakeIcon";
+import Unstake from "./Unstake";
+import Stake from "./Stake";
 
 export default function Page() {
-    return (
-      <div className="max-w-7xl mx-auto p-8 flex-grow">
+  return (
+    <div className="max-w-7xl mx-auto p-8 flex-grow">
       <div className="flex flex-col relative z-10 2xl:max-w-7xl xl:max-w-6xl lg:max-w-5xl lg:px-0 px-8 mx-auto w-full py-5 max-lg:flex-wrap">
         <div className="flex justify-between items-center pb-8 mb-8 border-b-2 border-white/10">
-          <div className="grow font-bold xl:text-3xl lg:text-2xl md:text-xl text-lg text-red-800">Your Account</div>
+          <div className="grow font-bold xl:text-3xl lg:text-2xl md:text-xl text-lg text-red-800">
+            Your Account
+          </div>
           <div className="inline-flex items-center gap-3">
-            <Link
-              className="inline-flex h-11 items-center justify-center rounded-md bg-red-800 px-5 py-2.5 text-sm font-medium text-white shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
-              href="#"
-              to="/withdraw"
-            >
-              Unstake
-              <UnstakeIcon/>
-            </Link>
-            <Link
-              className="inline-flex h-11 items-center justify-center rounded-md bg-red-800 px-5 py-2.5 text-sm font-medium text-white shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
-              href="#"
-              to="/launch"
-            >
-              Stake
-              <StakeIcon/>
-            </Link>
+            <Unstake />
+            <Stake />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -40,7 +32,10 @@ export default function Page() {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button className="text-sm p-1 rounded-full" variant="ghost">
+                        <Button
+                          className="text-sm p-1 rounded-full"
+                          variant="ghost"
+                        >
                           ?
                         </Button>
                       </TooltipTrigger>
@@ -63,7 +58,10 @@ export default function Page() {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button className="text-sm p-1 rounded-full" variant="ghost">
+                        <Button
+                          className="text-sm p-1 rounded-full"
+                          variant="ghost"
+                        >
                           ?
                         </Button>
                       </TooltipTrigger>
@@ -85,7 +83,10 @@ export default function Page() {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button className="text-sm p-1 rounded-full" variant="ghost">
+                        <Button
+                          className="text-sm p-1 rounded-full"
+                          variant="ghost"
+                        >
                           ?
                         </Button>
                       </TooltipTrigger>
@@ -96,7 +97,9 @@ export default function Page() {
                   </TooltipProvider>
                 </div>
               </div>
-              <p className="text-2xl font-semibold text-black">2:00:00 seconds</p>
+              <p className="text-2xl font-semibold text-black">
+                2:00:00 seconds
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -117,7 +120,10 @@ export default function Page() {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button className="text-sm p-1 rounded-full" variant="ghost">
+                        <Button
+                          className="text-sm p-1 rounded-full"
+                          variant="ghost"
+                        >
                           ?
                         </Button>
                       </TooltipTrigger>
@@ -139,7 +145,10 @@ export default function Page() {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button className="text-sm p-1 rounded-full" variant="ghost">
+                        <Button
+                          className="text-sm p-1 rounded-full"
+                          variant="ghost"
+                        >
                           ?
                         </Button>
                       </TooltipTrigger>
@@ -220,5 +229,5 @@ export default function Page() {
         </div>
       </div>
     </div>
-      );
-  }
+  );
+}

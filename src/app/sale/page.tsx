@@ -1,23 +1,31 @@
 /* global BigInt */
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useAccount, useContractWrite, useContractRead, Address, UseContractWriteConfig } from 'wagmi';
-import { waitForTransaction } from 'wagmi/actions';
-import toast, { Toaster } from 'react-hot-toast';
-import isEmpty from 'lodash.isempty';
+import React, { useEffect, useState } from "react";
+import {
+  useAccount,
+  useContractWrite,
+  useContractRead,
+  Address,
+  UseContractWriteConfig,
+} from "wagmi";
+import { waitForTransaction } from "wagmi/actions";
+import toast, { Toaster } from "react-hot-toast";
+import isEmpty from "lodash.isempty";
 
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { redirect } from 'next/navigation';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
 import token_sale_abi from "@/contracts/token_sale_abi.json";
 import usdcTokenAbi from "@/contracts/usdc_token_abi.json";
 
-import { MAX_UINT256 } from '@/constants/constants';
+import { MAX_UINT256 } from "@/constants/constants";
 
 export default function Page() {
   const [buyTokenValue, setBuyTokenValue] = useState(0 as number);
-  const [contractApprovalAmount, setContractApprovalAmount] = useState(BigInt(0));
+  const [contractApprovalAmount, setContractApprovalAmount] = useState(
+    BigInt(0)
+  );
   const [walletAddress, setWalletAddress] = useState<Address | null>(null);
   const account = useAccount();
 
@@ -26,169 +34,202 @@ export default function Page() {
     isSuccess: isAllowanceSuccessful,
     refetch: refetchAllowance,
   } = useContractRead({
-      address: process.env.NEXT_PUBLIC_USDC_TOKEN_CONTRACT_ADDRESS as Address,
-      abi: usdcTokenAbi,
-      functionName: 'allowance',
-      args: [walletAddress, process.env.NEXT_PUBLIC_TOKEN_SALE_CONTRACT_ADDRESS]
+    address: process.env.NEXT_PUBLIC_USDC_TOKEN_CONTRACT_ADDRESS as Address,
+    abi: usdcTokenAbi,
+    functionName: "allowance",
+    args: [walletAddress, process.env.NEXT_PUBLIC_TOKEN_SALE_CONTRACT_ADDRESS],
   });
 
   const {
-      data: approvalData,
-      isSuccess: approvalSuccess,
-      isError: isApprovalError,
-      error: approvalError,
-      write: approvalWrite,
+    data: approvalData,
+    isSuccess: approvalSuccess,
+    isError: isApprovalError,
+    error: approvalError,
+    write: approvalWrite,
   } = useContractWrite({
-      address: process.env.NEXT_PUBLIC_USDC_TOKEN_CONTRACT_ADDRESS as Address,
-      abi: usdcTokenAbi,
-      functionName: 'approve',
+    address: process.env.NEXT_PUBLIC_USDC_TOKEN_CONTRACT_ADDRESS as Address,
+    abi: usdcTokenAbi,
+    functionName: "approve",
   });
 
   const {
-      data: buyPionData,
-      isSuccess: isBuyPionSuccessful,
-      isError: isBuyPionError,
-      error: buyPionError,
-      write: buyPionWrite
+    data: buyPionData,
+    isSuccess: isBuyPionSuccessful,
+    isError: isBuyPionError,
+    error: buyPionError,
+    write: buyPionWrite,
   } = useContractWrite({
-      address: process.env.NEXT_PUBLIC_TOKEN_SALE_CONTRACT_ADDRESS as Address,
-      abi: token_sale_abi,
-      functionName: 'buyPion',
+    address: process.env.NEXT_PUBLIC_TOKEN_SALE_CONTRACT_ADDRESS as Address,
+    abi: token_sale_abi,
+    functionName: "buyPion",
   });
 
   useEffect(() => {
-      if (isBuyPionSuccessful) {
-          toast.success("Buying successful!");
-          toast.custom(
-              <div className="bg-white p-4 rounded-lg shadow-md flex align-items-center">
-                  <span>Verify your transaction on {' '} <br />
-                  <a
-                      href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-blue-500 hover:text-blue-800"
-                  >
-                      {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
-                  </a>
-                  </span>
-              </div>
-          )
-      }
+    if (isBuyPionSuccessful) {
+      toast.success("Buying successful!");
+      toast.custom(
+        <div className="bg-white p-4 rounded-lg shadow-md flex align-items-center">
+          <span>
+            Verify your transaction on <br />
+            <a
+              href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 hover:text-blue-800"
+            >
+              {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
+            </a>
+          </span>
+        </div>
+      );
+    }
   }, [isBuyPionSuccessful, buyPionData]);
 
   useEffect(() => {
-      if (isBuyPionError) {
-          if (buyPionError?.message)
-              toast.error(`There was an error in the supply.\n ${buyPionError?.message}`);
-          else
-              toast.error(`There was an error in the supply.\n ${buyPionError?.message}`);
-      }
+    if (isBuyPionError) {
+      if (buyPionError?.message)
+        toast.error(
+          `There was an error in the supply.\n ${buyPionError?.message}`
+        );
+      else
+        toast.error(
+          `There was an error in the supply.\n ${buyPionError?.message}`
+        );
+    }
   }, [isBuyPionError, buyPionError]);
 
   useEffect(() => {
-      if (isApprovalError) {
-          if (approvalError?.message)
-              toast.error(`There was an error in the approval. ${approvalError?.message}`);
-          else
-              toast.error(`There was an error in the approval. ${approvalError?.message}`);
-      }
+    if (isApprovalError) {
+      if (approvalError?.message)
+        toast.error(
+          `There was an error in the approval. ${approvalError?.message}`
+        );
+      else
+        toast.error(
+          `There was an error in the approval. ${approvalError?.message}`
+        );
+    }
   }, [isApprovalError, approvalError]);
 
   useEffect(() => {
-      if (!isEmpty(account)) {
-          setWalletAddress(account?.address as Address);
-      }
+    if (!isEmpty(account)) {
+      setWalletAddress(account?.address as Address);
+    }
   }, [account]);
 
   useEffect(() => {
     if (isAllowanceSuccessful) {
-        setContractApprovalAmount(allowanceAmount as bigint);
+      setContractApprovalAmount(allowanceAmount as bigint);
     }
-}, [isAllowanceSuccessful, allowanceAmount]);
+  }, [isAllowanceSuccessful, allowanceAmount]);
 
   useEffect(() => {
     if (approvalSuccess) {
-      waitForTransaction({ hash: approvalData?.hash as `0x${string}` }).then((res) => {
-            refetchAllowance().then(response => {
-                setContractApprovalAmount(response.data as bigint);
-            });
-            toast.success("Contract is approved");
-            buyPionWrite({
-                args: [buyTokenValue * Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0)],
-                from: walletAddress,
-            } as UseContractWriteConfig);
-        });
+      waitForTransaction({ hash: approvalData?.hash as `0x${string}` }).then(
+        (res) => {
+          refetchAllowance().then((response) => {
+            setContractApprovalAmount(response.data as bigint);
+          });
+          toast.success("Contract is approved");
+          buyPionWrite({
+            args: [
+              buyTokenValue *
+                Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0),
+            ],
+            from: walletAddress,
+          } as UseContractWriteConfig);
+        }
+      );
     }
   }, [approvalSuccess, walletAddress, buyTokenValue]);
 
   const approveUSDT = () => {
     if (isEmpty(walletAddress) || walletAddress === undefined) {
-        toast.error("Please connect your wallet");
-    }
-    else if (buyTokenValue < 0.01) {
-        toast.error("Please enter a valid amount to Buy! Minimum amount is 0.01 USDT");
-    }
-    else if (BigInt(contractApprovalAmount) >= 
-        BigInt(buyTokenValue * Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0))) {
-        buyPionWrite({
-            args: [buyTokenValue * Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0)],
-            from: walletAddress,
-        } as UseContractWriteConfig);
+      toast.error("Please connect your wallet");
+    } else if (buyTokenValue < 0.01) {
+      toast.error(
+        "Please enter a valid amount to Buy! Minimum amount is 0.01 USDT"
+      );
+    } else if (
+      BigInt(contractApprovalAmount) >=
+      BigInt(
+        buyTokenValue * Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0)
+      )
+    ) {
+      buyPionWrite({
+        args: [
+          buyTokenValue *
+            Number(process.env.NEXT_PUBLIC_USDC_TOKEN_DECIMAL ?? 0),
+        ],
+        from: walletAddress,
+      } as UseContractWriteConfig);
     } else {
-        approvalWrite({
-            args: [process.env.NEXT_PUBLIC_TOKEN_SALE_CONTRACT_ADDRESS,
-                MAX_UINT256],
-            from: walletAddress,
-        } as UseContractWriteConfig);
+      approvalWrite({
+        args: [
+          process.env.NEXT_PUBLIC_TOKEN_SALE_CONTRACT_ADDRESS,
+          MAX_UINT256,
+        ],
+        from: walletAddress,
+      } as UseContractWriteConfig);
     }
-}
+  };
 
   return (
     <div className="grow relative h-screen overflow-hidden">
       <Toaster />
       <div key="1" className="max-w-7xl mx-auto p-8 flex-grow">
-      <div className="bg-white flex min-h-screen justify-center items-center p-8">
-        <div className="max-w-lg mx-auto p-12 bg-white-800 rounded-2xl shadow-2xl">
-          <div className="text-center text-grey-200">
-            <h2 className="text-4xl font-bold mb-4">
-              Buy
-              <span className="text-red-800"> $PION</span>
-            </h2>
-            <div className="mb-8 flex items-center justify-between">
-              <label className="text-2sm font-medium mb-2 p-2" htmlFor="amount">
-                Amount
-              </label>
-              <Input
-                className="w-3/5 rounded-2xl shadow-2xl placeholder-gray-400 text-black text-2xl ml-auto text-right"
-                placeholder="0"
-                type="number"
-                min="0"
-                value={buyTokenValue}
-                onChange={(e) => setBuyTokenValue(parseFloat(e.target.value))}
-              />
-              <label className="text-2sm font-medium mb-2 p-2" htmlFor="amount">
-                USDT
-              </label>
-            </div>
-            <div className="mb-8 flex items-center justify-between">
-              <label className="text-2sm font-medium p-2" htmlFor="amount">
-                You will receive
-              </label>
-              <label className="text-2sm font-bold mb-2 p-2 text-red-800 text-lg">{buyTokenValue * 100} $PION</label>
-            </div>
-            <div className="pb-4">
-            <label className="text-lg font-medium p-4 text-grey-100 mt-8">1 <span className="text-red-800">$PION</span> = 0.01 USDT</label>
-            </div>
-            <Button
-              className="w-full bg-red-800 px-8 py-4 text-2sm font-medium text-white shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-black-300 rounded"
-              onClick={() => approveUSDT()}
+        <div className="bg-white flex min-h-screen justify-center items-center p-8">
+          <div className="max-w-lg mx-auto p-12 bg-white-800 rounded-2xl shadow-2xl">
+            <div className="text-center text-grey-200">
+              <h2 className="text-4xl font-bold mb-4">
+                Buy
+                <span className="text-red-800"> $PION</span>
+              </h2>
+              <div className="mb-8 flex items-center justify-between">
+                <label
+                  className="text-2sm font-medium mb-2 p-2"
+                  htmlFor="amount"
+                >
+                  Amount
+                </label>
+                <Input
+                  className="w-3/5 rounded-2xl shadow-2xl placeholder-gray-400 text-black text-2xl ml-auto text-right"
+                  placeholder="0"
+                  type="number"
+                  min="0"
+                  value={buyTokenValue}
+                  onChange={(e) => setBuyTokenValue(parseFloat(e.target.value))}
+                />
+                <label
+                  className="text-2sm font-medium mb-2 p-2"
+                  htmlFor="amount"
+                >
+                  USDT
+                </label>
+              </div>
+              <div className="mb-8 flex items-center justify-between">
+                <label className="text-2sm font-medium p-2" htmlFor="amount">
+                  You will receive
+                </label>
+                <label className="text-2sm font-bold mb-2 p-2 text-red-800 text-lg">
+                  {buyTokenValue * 100} $PION
+                </label>
+              </div>
+              <div className="pb-4">
+                <label className="text-lg font-medium p-4 text-grey-100 mt-8">
+                  1 <span className="text-red-800">$PION</span> = 0.01 USDT
+                </label>
+              </div>
+              <Button
+                className="w-full bg-red-800 px-8 py-4 text-2sm font-medium text-white shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-black-300 rounded"
+                onClick={() => approveUSDT()}
               >
-              Buy Now
-            </Button>
+                Buy Now
+              </Button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    </div>  
   );
 }
