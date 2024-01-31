@@ -104,10 +104,6 @@ export default function Page() {
         toast.error(
           `There was an error in the approval. ${approvalError?.message}`
         );
-      else
-        toast.error(
-          `There was an error in the approval. ${approvalError?.message}`
-        );
     }
   }, [isApprovalError, approvalError]);
 
