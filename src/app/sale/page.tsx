@@ -17,9 +17,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
 import token_sale_abi from "@/contracts/token_sale_abi.json";
-import usdcTokenAbi from "@/contracts/usdc_token_abi.json";
+import usdtTokenAbi from "@/contracts/usdt_token_abi.json";
 
 import { MAX_UINT256 } from "@/constants/constants";
+import { MINT_1K_USDT } from "@/constants/constants";
+
+const chainEnv = process.env.NEXT_PUBLIC_CHAIN_ENV;
 
 export default function Page() {
   const [buyTokenValue, setBuyTokenValue] = useState(0 as number);
@@ -35,7 +38,7 @@ export default function Page() {
     refetch: refetchAllowance,
   } = useContractRead({
     address: process.env.NEXT_PUBLIC_USDT_TOKEN_CONTRACT_ADDRESS as Address,
-    abi: usdcTokenAbi,
+    abi: usdtTokenAbi,
     functionName: "allowance",
     args: [walletAddress, process.env.NEXT_PUBLIC_TOKEN_SALE_CONTRACT_ADDRESS],
   });
@@ -48,8 +51,20 @@ export default function Page() {
     write: approvalWrite,
   } = useContractWrite({
     address: process.env.NEXT_PUBLIC_USDT_TOKEN_CONTRACT_ADDRESS as Address,
-    abi: usdcTokenAbi,
+    abi: usdtTokenAbi,
     functionName: "approve",
+  });
+
+  const {
+    data: mintMockUsdtData,
+    isSuccess: isMintMockUsdtSuccess,
+    isError: isMintMockUsdtError,
+    error: mintMockUsdtError,
+    write: minMockUsdtWrite,
+  } = useContractWrite({
+    address: process.env.NEXT_PUBLIC_USDT_TOKEN_CONTRACT_ADDRESS as Address,
+    abi: usdtTokenAbi,
+    functionName: "mint",
   });
 
   const {
@@ -63,6 +78,40 @@ export default function Page() {
     abi: token_sale_abi,
     functionName: "buyPion",
   });
+
+  useEffect(() => {
+    if (isMintMockUsdtSuccess) {
+      toast.success("Mint successful!");
+      toast.custom(
+        <div className="bg-white p-4 rounded-lg shadow-md flex align-items-center">
+          <span>
+            Verify your transaction on <br />
+            <a
+              href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${mintMockUsdtData?.hash}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 hover:text-blue-800"
+            >
+              {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${mintMockUsdtData?.hash}`}
+            </a>
+          </span>
+        </div>
+      );
+    }
+  }, [isMintMockUsdtSuccess, mintMockUsdtData]);
+
+  useEffect(() => {
+    if (isMintMockUsdtError) {
+      if (mintMockUsdtError?.message)
+        toast.error(
+          `There was an error in the mint.\n ${mintMockUsdtError?.message}`
+        );
+      else
+        toast.error(
+          `There was an error in the mint.\n ${mintMockUsdtError?.message}`
+        );
+    }
+  }, [isMintMockUsdtError, mintMockUsdtError]);
 
   useEffect(() => {
     if (isBuyPionSuccessful) {
@@ -89,11 +138,11 @@ export default function Page() {
     if (isBuyPionError) {
       if (buyPionError?.message)
         toast.error(
-          `There was an error in the supply.\n ${buyPionError?.message}`
+          `There was an error in the exchange.\n ${buyPionError?.message}`
         );
       else
         toast.error(
-          `There was an error in the supply.\n ${buyPionError?.message}`
+          `There was an error in the exchange.\n ${buyPionError?.message}`
         );
     }
   }, [isBuyPionError, buyPionError]);
@@ -170,6 +219,17 @@ export default function Page() {
     }
   };
 
+  const mintMockUSDT = () => {
+    if (isEmpty(walletAddress) || walletAddress === undefined) {
+      toast.error("Please connect your wallet");
+    } else {
+      minMockUsdtWrite({
+        args: [walletAddress, MINT_1K_USDT],
+        from: walletAddress,
+      } as UseContractWriteConfig);
+    }
+  };
+
   return (
     <div className="grow relative h-screen overflow-hidden">
       <Toaster />
@@ -179,7 +239,12 @@ export default function Page() {
             <div className="text-center text-grey-200">
               <h2 className="text-4xl font-bold mb-4">
                 Buy
-                <span className="text-red-800"> $PION</span>
+                {chainEnv === "testnet" && (
+                  <span className="text-red-800"> $PION-DUBAI</span>
+                )}
+                {chainEnv === "mainnet" && (
+                  <span className="text-red-800"> $PION</span>
+                )}
               </h2>
               <div className="mb-8 flex items-center justify-between">
                 <label
@@ -215,6 +280,15 @@ export default function Page() {
                 <label className="text-lg font-medium p-4 text-grey-100 mt-8">
                   1 <span className="text-red-800">$PION</span> = 0.01 USDT
                 </label>
+                {chainEnv === "testnet" && (
+                  <Button
+                    className="mt-4 ring-2 text-red-800 ring-red-800 rounded-2xl bg-transparent"
+                    variant="link"
+                    onClick={() => mintMockUSDT()}
+                  >
+                    Mint Mock USDT
+                  </Button>
+                )}
               </div>
               <Button
                 className="w-full bg-red-800 px-8 py-4 text-2sm font-medium text-white shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-black-300 rounded"

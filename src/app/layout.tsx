@@ -56,11 +56,16 @@ export default function RootLayout({
               <nav className="w-64 p-8 bg-red-800 text-white flex flex-col justify-between">
                 <div>
                   <h1 className="text-2xl font-bold mb-8">
-                    <img
-                      alt="PION Protocol"
-                      className="h-16 w-auto"
-                      src="/Pion-logo.png"
-                    />
+                    <div className="inline-flex items-center">
+                      <img
+                        alt="PION Protocol"
+                        className="h-16 w-auto"
+                        src="/Pion-logo.png"
+                      />
+                      <span className="ml-2 size bg-yellow-200 text-black font-bold text-lg p-1 rounded">
+                        Testnet
+                      </span>
+                    </div>
                   </h1>
                   <ul>
                     <li className="mb-4 flex items-center">
