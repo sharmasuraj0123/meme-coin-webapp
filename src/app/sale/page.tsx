@@ -21,10 +21,12 @@ import usdtTokenAbi from "@/contracts/usdt_token_abi.json";
 
 import { MAX_UINT256 } from "@/constants/constants";
 import { MINT_1K_USDT } from "@/constants/constants";
+import { useLoading } from "@/context/Loading";
 
 const chainEnv = process.env.NEXT_PUBLIC_CHAIN_ENV;
 
 export default function Page() {
+  const { setLoading } = useLoading();
   const [buyTokenValue, setBuyTokenValue] = useState(0 as number);
   const [contractApprovalAmount, setContractApprovalAmount] = useState(
     BigInt(0)
@@ -57,6 +59,7 @@ export default function Page() {
 
   const {
     data: mintMockUsdtData,
+    isLoading: isMintMockUsdtLoading,
     isSuccess: isMintMockUsdtSuccess,
     isError: isMintMockUsdtError,
     error: mintMockUsdtError,
@@ -70,6 +73,7 @@ export default function Page() {
   const {
     data: buyPionData,
     isSuccess: isBuyPionSuccessful,
+    isLoading: isBuyPionLoading,
     isError: isBuyPionError,
     error: buyPionError,
     write: buyPionWrite,
@@ -80,23 +84,40 @@ export default function Page() {
   });
 
   useEffect(() => {
+    if (isMintMockUsdtLoading) {
+      setLoading(true, "Mint in progress...");
+    }
+  }, [isMintMockUsdtLoading]);
+
+  useEffect(() => {
+    if (isBuyPionLoading) {
+      setLoading(true, "Buying in progress...");
+    }
+  }, [isBuyPionLoading]);
+
+  useEffect(() => {
     if (isMintMockUsdtSuccess) {
-      toast.success("Mint successful!");
-      toast.custom(
-        <div className="bg-white p-4 rounded-lg shadow-md flex align-items-center">
-          <span>
-            Verify your transaction on <br />
-            <a
-              href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${mintMockUsdtData?.hash}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-blue-500 hover:text-blue-800"
-            >
-              {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${mintMockUsdtData?.hash}`}
-            </a>
-          </span>
-        </div>
-      );
+      waitForTransaction({
+        hash: mintMockUsdtData?.hash as `0x${string}`,
+      }).then((_res) => {
+        setLoading(false);
+        toast.success("Mint successful!");
+        toast.custom(
+          <div className="bg-white p-4 rounded-lg shadow-md flex align-items-center">
+            <span>
+              Verify your transaction on <br />
+              <a
+                href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${mintMockUsdtData?.hash}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-500 hover:text-blue-800"
+              >
+                {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${mintMockUsdtData?.hash}`}
+              </a>
+            </span>
+          </div>
+        );
+      });
     }
   }, [isMintMockUsdtSuccess, mintMockUsdtData]);
 
@@ -115,22 +136,27 @@ export default function Page() {
 
   useEffect(() => {
     if (isBuyPionSuccessful) {
-      toast.success("Buying successful!");
-      toast.custom(
-        <div className="bg-white p-4 rounded-lg shadow-md flex align-items-center">
-          <span>
-            Verify your transaction on <br />
-            <a
-              href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-blue-500 hover:text-blue-800"
-            >
-              {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
-            </a>
-          </span>
-        </div>
-      );
+      waitForTransaction({
+        hash: buyPionData?.hash as `0x${string}`,
+      }).then((_res) => {
+        setLoading(false);
+        toast.success("Buying successful!");
+        toast.custom(
+          <div className="bg-white p-4 rounded-lg shadow-md flex align-items-center">
+            <span>
+              Verify your transaction on <br />
+              <a
+                href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-500 hover:text-blue-800"
+              >
+                {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
+              </a>
+            </span>
+          </div>
+        );
+      });
     }
   }, [isBuyPionSuccessful, buyPionData]);
 

@@ -7,8 +7,8 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 
-import Unstake from "./Unstake";
-import Stake from "./Stake";
+import Unstake from "./unstake/Unstake";
+import Stake from "./stake/Stake";
 
 export default function Page() {
 
