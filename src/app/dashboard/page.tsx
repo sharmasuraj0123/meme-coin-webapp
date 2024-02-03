@@ -379,6 +379,7 @@ export default function Page() {
                   logs.map((log, index) => (
                     <tr
                       className="group/history invest shadow-lg"
+                      key={index}
                       onClick={() =>
                         window.open(
                           `${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${log.transactionHash}`,
