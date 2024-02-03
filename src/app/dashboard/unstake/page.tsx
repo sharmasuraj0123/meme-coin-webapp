@@ -14,16 +14,20 @@ import isEmpty from "lodash.isempty";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import abi from "@/contracts/staking_contract_abi.json";
+import { useLoading } from "@/context/Loading";
+import { waitForTransaction } from "wagmi/actions";
 
 const chainEnv = process.env.NEXT_PUBLIC_CHAIN_ENV;
 
 export default function Page() {
+  const { setLoading } = useLoading();
   const [withdrawalAmount, setWithdrawalAmount] = useState(0 as number);
   const [walletAddress, setWalletAddress] = useState<Address | null>(null);
   const account = useAccount();
 
   const {
     data: withdrawalData,
+    isLoading: isWithdrawLoading,
     isSuccess: isWithdrawSuccessful,
     write: withdrawalWrite,
     isError: isWithdrawError,
@@ -35,26 +39,38 @@ export default function Page() {
   });
 
   useEffect(() => {
+    if (isWithdrawLoading) {
+      setLoading(true, "Queueing withdraw...");
+    }
+  }, [isWithdrawLoading]);
+
+  useEffect(() => {
     if (isWithdrawSuccessful) {
-      toast.success("Withdrawal successful!");
-      toast.success(
-        <span>
-          Verify your transaction on{" "}
-          <a
-            href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${withdrawalData?.hash}`}
-            target="_blank"
-            rel="noreferrer"
-            className="text-blue-500 hover:text-blue-800"
-          >
-            {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${withdrawalData?.hash}`}
-          </a>
-        </span>
-      );
+      waitForTransaction({
+        hash: withdrawalData?.hash as `0x${string}`,
+      }).then((_res) => {
+        setLoading(false);
+        toast.success("Withdrawal successful!");
+        toast.success(
+          <span>
+            Verify your transaction on{" "}
+            <a
+              href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${withdrawalData?.hash}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 hover:text-blue-800"
+            >
+              {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${withdrawalData?.hash}`}
+            </a>
+          </span>
+        );
+      });
     }
   }, [isWithdrawSuccessful, withdrawalData]);
 
   useEffect(() => {
     if (isWithdrawError) {
+      setLoading(false);
       if (withdrawalError?.message)
         toast.error(`Withdrawal failed. ${withdrawalError.message}`);
     }
@@ -115,23 +131,12 @@ export default function Page() {
                     setWithdrawalAmount(parseFloat(e.target.value))
                   }
                 />
-                <label
-                  className="text-2sm font-medium mb-2 p-2"
-                  htmlFor="amount"
-                >
-                  {chainEnv === "testnet" && (
-                    <span className="text-red-800"> $PION-DUBAI</span>
-                  )}
-                  {chainEnv === "mainnet" && (
-                    <span className="text-red-800"> $PION</span>
-                  )}
-                </label>
               </div>
               <Button
                 className="w-full bg-red-800 px-8 py-4 text-2sm font-medium text-white shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-black-300 rounded"
                 onClick={() => withdrawPION()}
               >
-                Withdraw
+                Unstake
               </Button>
             </div>
           </div>

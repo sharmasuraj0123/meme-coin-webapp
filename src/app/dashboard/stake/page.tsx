@@ -19,10 +19,12 @@ import staking_contract_abi from "@/contracts/staking_contract_abi.json";
 import pionTokenAbi from "@/contracts/pion_token_abi.json";
 
 import { MAX_UINT256 } from "@/constants/constants";
+import { useLoading } from "@/context/Loading";
 
 const chainEnv = process.env.NEXT_PUBLIC_CHAIN_ENV;
 
 export default function Page() {
+  const { setLoading } = useLoading();
   const [stakedValue, setStakedValue] = useState(0 as number);
   const [walletAddress, setWalletAddress] = useState<Address | null>(null);
   const [contractApprovalAmount, setContractApprovalAmount] = useState(
@@ -32,6 +34,7 @@ export default function Page() {
 
   const {
     data: approvalData,
+    isLoading: isApprovalLoading,
     isSuccess: approvalSuccess,
     isError: isApprovalError,
     error: approvalError,
@@ -44,6 +47,7 @@ export default function Page() {
 
   const {
     data: supplyData,
+    isLoading: isSupplyLoading,
     isSuccess: isSupplySuccessful,
     isError: isSupplyError,
     error: supplyError,
@@ -66,28 +70,46 @@ export default function Page() {
   });
 
   useEffect(() => {
+    if (isApprovalLoading) {
+      setLoading(true, "Approving USDT...");
+    }
+  }, [isApprovalLoading]);
+
+  useEffect(() => {
+    if (isSupplyLoading) {
+      setLoading(true, "Queueing stake...");
+    }
+  }, [isSupplyLoading]);
+
+  useEffect(() => {
     if (isSupplySuccessful) {
-      toast.success("Staking successful!");
-      toast.custom(
-        <div className="bg-white p-4 rounded-lg shadow-md flex align-items-center">
-          <span>
-            Verify your transaction on <br />
-            <a
-              href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${supplyData?.hash}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-blue-500 hover:text-blue-800"
-            >
-              {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${supplyData?.hash}`}
-            </a>
-          </span>
-        </div>
-      );
+      waitForTransaction({
+        hash: supplyData?.hash as `0x${string}`,
+      }).then((_res) => {
+        setLoading(false);
+        toast.success("Staking successful!");
+        toast.custom(
+          <div className="bg-white p-4 rounded-lg shadow-md flex align-items-center">
+            <span>
+              Verify your transaction on <br />
+              <a
+                href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${supplyData?.hash}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-500 hover:text-blue-800"
+              >
+                {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${supplyData?.hash}`}
+              </a>
+            </span>
+          </div>
+        );
+      });
     }
   }, [isSupplySuccessful, supplyData]);
 
   useEffect(() => {
     if (isSupplyError) {
+      setLoading(false);
       if (supplyError?.message) {
         toast.error(
           `There was an error in the supply.\n ${supplyError.message}`
@@ -98,6 +120,7 @@ export default function Page() {
 
   useEffect(() => {
     if (isApprovalError) {
+      setLoading(false);
       if (approvalError?.message)
         toast.error(
           `There was an error in the approval. ${approvalError.message}`
@@ -180,7 +203,7 @@ export default function Page() {
                 {chainEnv === "mainnet" && (
                   <span className="text-red-800"> $PION</span>
                 )}{" "}
-                from Pool
+                to Pool
               </h2>
               <div className="mb-8 flex items-center justify-between">
                 <label
@@ -197,17 +220,6 @@ export default function Page() {
                   value={stakedValue}
                   onChange={(e) => setStakedValue(parseFloat(e.target.value))}
                 />
-                <label
-                  className="text-2sm font-medium mb-2 p-2"
-                  htmlFor="amount"
-                >
-                  {chainEnv === "testnet" && (
-                    <span className="text-red-800"> $PION-DUBAI</span>
-                  )}
-                  {chainEnv === "mainnet" && (
-                    <span className="text-red-800"> $PION</span>
-                  )}
-                </label>
               </div>
               <Button
                 className="w-full bg-red-800 px-8 py-4 text-2sm font-medium text-white shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-black-300 rounded"

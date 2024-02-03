@@ -15,7 +15,6 @@ import isEmpty from "lodash.isempty";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { redirect } from "next/navigation";
 import token_sale_abi from "@/contracts/token_sale_abi.json";
 import usdtTokenAbi from "@/contracts/usdt_token_abi.json";
 
@@ -123,6 +122,7 @@ export default function Page() {
 
   useEffect(() => {
     if (isMintMockUsdtError) {
+      setLoading(false);
       if (mintMockUsdtError?.message)
         toast.error(
           `There was an error in the mint.\n ${mintMockUsdtError?.message}`
@@ -162,6 +162,7 @@ export default function Page() {
 
   useEffect(() => {
     if (isBuyPionError) {
+      setLoading(false);
       if (buyPionError?.message)
         toast.error(
           `There was an error in the exchange.\n ${buyPionError?.message}`
@@ -175,6 +176,7 @@ export default function Page() {
 
   useEffect(() => {
     if (isApprovalError) {
+      setLoading(false);
       if (approvalError?.message)
         toast.error(
           `There was an error in the approval. ${approvalError?.message}`
@@ -299,7 +301,13 @@ export default function Page() {
                   You will receive
                 </label>
                 <label className="text-2sm font-bold mb-2 p-2 text-red-800 text-lg">
-                  {buyTokenValue * 100} $PION
+                  {buyTokenValue * 100}
+                  {chainEnv === "testnet" && (
+                    <span className="text-red-800"> $PION-DUBAI</span>
+                  )}
+                  {chainEnv === "mainnet" && (
+                    <span className="text-red-800"> $PION</span>
+                  )}
                 </label>
               </div>
               <div className="pb-4">
