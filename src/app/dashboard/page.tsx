@@ -22,10 +22,27 @@ import Unstake from "./unstake/Unstake";
 import Stake from "./stake/Stake";
 import { Abi, Log } from "viem";
 
-type getAmountBySupplier = {
+interface GetAmountBySupplier {
   balanceAmount: string;
   transferAmount: string;
-};
+}
+interface EventLog {
+  address: string;
+  args: {
+    supplier: string;
+    pionTokens: BigNumber;
+    timestamp: BigNumber;
+  };
+  blockHash: string;
+  blockNumber: BigNumber;
+  data: string;
+  eventName: string;
+  logIndex: number;
+  removed: boolean;
+  topics: string[];
+  transactionHash: string;
+  transactionIndex: number;
+}
 
 const TOKEN_DECIMAL = new BigNumber(process.env.NEXT_PUBLIC_TOKEN_DECIMAL ?? 0);
 
@@ -41,7 +58,7 @@ export default function Page() {
   const [totalTokensSupplied, setTotalTokensSupplied] = useState<BigNumber>(
     BigNumber(0)
   );
-  const [logs, setLogs] = useState<Log[]>();
+  const [logs, setLogs] = useState<EventLog[] | undefined>();
   const [timeLeft, setTimeLeft] = useState<number>(0);
 
   const config = {
@@ -97,16 +114,14 @@ export default function Page() {
   useEffect(() => {
     if (userWalletAddress) {
       if (stakingPool) {
-        console.dir(stakingPool, { depth: null });
-
         const percentage = BigNumber(
-          (stakingPool[0]?.result as getAmountBySupplier)["balanceAmount"]
+          (stakingPool[0]?.result as GetAmountBySupplier)["balanceAmount"]
         )
           .div(stakingPool[1]?.result as string)
           .times(100);
 
         const stakedAmount = BigNumber(
-          (stakingPool[0]?.result as getAmountBySupplier)["balanceAmount"]
+          (stakingPool[0]?.result as GetAmountBySupplier)["balanceAmount"]
         ).dividedBy(TOKEN_DECIMAL);
 
         const totalTokensSupplied = BigNumber(
@@ -114,7 +129,7 @@ export default function Page() {
         ).dividedBy(TOKEN_DECIMAL);
 
         const transferAmount = BigNumber(
-          (stakingPool[0]?.result as getAmountBySupplier)["transferAmount"]
+          (stakingPool[0]?.result as GetAmountBySupplier)["transferAmount"]
         ).dividedBy(TOKEN_DECIMAL);
 
         const walletBalance = BigNumber(
@@ -136,7 +151,7 @@ export default function Page() {
 
   useEffect(() => {
     async function getLogs() {
-      const supplyLogs = (await publicClient.getContractEvents({
+      const supplyLogs = await publicClient.getContractEvents({
         ...config,
         eventName: "SupplyRequest",
         args: {
@@ -144,9 +159,9 @@ export default function Page() {
         },
         fromBlock: "earliest",
         toBlock: "latest",
-      })) as Log[];
+      });
 
-      const withdrawLogs = (await publicClient.getContractEvents({
+      const withdrawLogs = await publicClient.getContractEvents({
         ...config,
         eventName: "WithdrawRequest",
         args: {
@@ -154,15 +169,14 @@ export default function Page() {
         },
         fromBlock: "earliest",
         toBlock: "latest",
-      })) as Log[];
+      });
 
       const sortedLogs = orderBy(
-        [...supplyLogs, ...withdrawLogs],
-        (log: Log) => log?.args?.timestamp,
+        [...supplyLogs, ...withdrawLogs] as any as EventLog[],
+        (log: EventLog) => log.args.timestamp,
         "desc"
       );
-      console.log("Sorted Logs are ");
-      console.dir(sortedLogs, { depth: null });
+
       setLogs(sortedLogs);
     }
 
@@ -389,7 +403,7 @@ export default function Page() {
                     >
                       <td className="bg-white/5 group-hover/history:bg-white/10 cursor-pointer duration-100 border-y-2 first:border-l-2 last:border-r-2 border-black/10 text-black/70 md:p-5 p-3 text-left first:rounded-l-xl last:rounded-r-xl">
                         {moment
-                          .unix(deserialize(log.args?.timestamp))
+                          .unix(deserialize(log.args.timestamp.toString()))
                           .format("MM-DD-YYYY")}
                       </td>
                       <td className="bg-white/5 group-hover/history:bg-white/10 cursor-pointer duration-100 border-y-2 first:border-l-2 last:border-r-2 border-black/10 text-black/70 md:p-5 p-3 text-left first:rounded-l-xl last:rounded-r-xl">
