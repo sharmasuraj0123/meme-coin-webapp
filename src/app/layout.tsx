@@ -61,11 +61,13 @@ export default function RootLayout({
                     <div>
                       <h1 className="text-2xl font-bold mb-8">
                         <div className="inline-flex items-center">
-                          <img
-                            alt="PION Protocol"
-                            className="h-16 w-auto"
-                            src="/Pion-logo.png"
-                          />
+                          <a href="https://pion.capital">
+                            <img
+                              alt="PION Protocol"
+                              className="h-16 w-auto"
+                              src="/Pion-logo.png"
+                            />
+                          </a>
                           <span className="ml-2 size bg-yellow-200 text-black font-bold text-lg p-1 rounded">
                             Testnet
                           </span>
