@@ -19,10 +19,16 @@ import token_sale_abi from "@/contracts/token_sale_abi.json";
 import usdtTokenAbi from "@/contracts/usdt_token_abi.json";
 
 import { MAX_UINT256 } from "@/constants/constants";
-import { MINT_1K_USDT } from "@/constants/constants";
+import {
+  MINT_1K_USDT,
+  MEME_COIN_NAME,
+  MEME_COIN_SYMBOL,
+} from "@/constants/constants";
 import { useLoading } from "@/context/Loading";
 
 const chainEnv = process.env.NEXT_PUBLIC_CHAIN_ENV;
+var BACKGROUND_COLOR = "yellow";
+var TEXT_COLOR = "yellow";
 
 export default function Page() {
   const { setLoading } = useLoading();
@@ -109,7 +115,7 @@ export default function Page() {
                 href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${mintMockUsdtData?.hash}`}
                 target="_blank"
                 rel="noreferrer"
-                className="text-blue-500 hover:text-blue-800"
+                className="text-teal-500 hover:text-teal-500"
               >
                 {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${mintMockUsdtData?.hash}`}
               </a>
@@ -149,7 +155,7 @@ export default function Page() {
                 href={`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
                 target="_blank"
                 rel="noreferrer"
-                className="text-blue-500 hover:text-blue-800"
+                className="text-teal-500 hover:text-teal-500"
               >
                 {`${process.env.NEXT_PUBLIC_POLYGONSCAN_URL}/tx/${buyPionData?.hash}`}
               </a>
@@ -264,14 +270,14 @@ export default function Page() {
       <div key="1" className="max-w-7xl mx-auto p-8 flex-grow">
         <div className="bg-white flex min-h-screen justify-center items-center p-8">
           <div className="max-w-lg mx-auto p-12 bg-white-800 rounded-2xl shadow-2xl">
-            <div className="text-center text-grey-200">
+            <div className="text-center text-teal-500">
               <h2 className="text-4xl font-bold mb-4">
                 Buy
                 {chainEnv === "testnet" && (
-                  <span className="text-red-800"> $PION-DUBAI</span>
+                  <span className={`text-teal-500`}> ${MEME_COIN_NAME}</span>
                 )}
                 {chainEnv === "mainnet" && (
-                  <span className="text-red-800"> $PION</span>
+                  <span className="text-teal-500"> ${MEME_COIN_NAME}</span>
                 )}
               </h2>
               <div className="mb-8 flex items-center justify-between">
@@ -300,32 +306,24 @@ export default function Page() {
                 <label className="text-2sm font-medium p-2" htmlFor="amount">
                   You will receive
                 </label>
-                <label className="text-2sm font-bold mb-2 p-2 text-red-800 text-lg">
+                <label className="text-2sm font-bold mb-2 p-2 text-teal-500 text-lg">
                   {buyTokenValue * 100}
                   {chainEnv === "testnet" && (
-                    <span className="text-red-800"> $PION-DUBAI</span>
+                    <span className="text-teal-500"> ${MEME_COIN_SYMBOL}</span>
                   )}
                   {chainEnv === "mainnet" && (
-                    <span className="text-red-800"> $PION</span>
+                    <span className="text-teal-500"> ${MEME_COIN_SYMBOL}</span>
                   )}
                 </label>
               </div>
               <div className="pb-4">
-                <label className="text-lg font-medium p-4 text-grey-100 mt-8">
-                  1 <span className="text-red-800">$PION</span> = 0.01 USDT
+                <label className="text-lg font-medium p-4 text-teal-500 mt-8">
+                  1 <span className="text-teal-500">${MEME_COIN_SYMBOL}</span>{" "}
+                  = 0.01 USDT
                 </label>
-                {chainEnv === "testnet" && (
-                  <Button
-                    className="mt-4 ring-2 text-red-800 ring-red-800 rounded-2xl bg-transparent"
-                    variant="link"
-                    onClick={() => mintMockUSDT()}
-                  >
-                    Mint Mock USDT
-                  </Button>
-                )}
               </div>
               <Button
-                className="w-full bg-red-800 px-8 py-4 text-2sm font-medium text-white shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-black-300 rounded"
+                className={`w-full bg-red-800 px-8 py-4 text-2sm font-medium text-white shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-teal-500 dark:hover:bg-gray-50/90 dark:focus-visible:ring-black-300 rounded`}
                 onClick={() => approveUSDT()}
               >
                 Buy Now
