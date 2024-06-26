@@ -6,7 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { LayoutDashboardIcon } from "@/components/LayoutDashboardIcon";
 import { ActivityIcon } from "@/components/ActivityIcon";
 import { StoreIcon } from "@/components/StoreIcon";
-import { BACKGROUND_COLOR } from "@/constants/constants";
+import { MEME_COIN_NAME } from "@/constants/constants";
 import {
   ConnectKitProvider,
   ConnectKitButton,
@@ -48,7 +48,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Pion</title>
+        <title>{MEME_COIN_NAME}</title>
         <meta name="description" content="Finance for i-Gaming Ventures" />
       </head>
       <body className={inter.className}>
@@ -59,10 +59,12 @@ export default function RootLayout({
               <ContentWithSpinner>
                 <div key="1" className="bg-white flex min-h-screen">
                   <nav
-                    className={`w-64 p-8 ${BACKGROUND_COLOR} text-white flex flex-col justify-between`}
+                    className={`w-64 p-8 bg-blue-800 text-white flex flex-col justify-between`}
                   >
                     <div>
-                      <h1 className="text-2xl font-bold mb-8">MEME TOKEN</h1>
+                      <h1 className="text-2xl font-bold mb-8">
+                        {MEME_COIN_NAME}
+                      </h1>
                     </div>
                     <div className="self-center">
                       <ConnectKitButton theme="soft" />
