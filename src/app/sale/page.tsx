@@ -253,17 +253,6 @@ export default function Page() {
     }
   };
 
-  const mintMockUSDT = () => {
-    if (isEmpty(walletAddress) || walletAddress === undefined) {
-      toast.error("Please connect your wallet");
-    } else {
-      minMockUsdtWrite({
-        args: [walletAddress, MINT_1K_USDT],
-        from: walletAddress,
-      } as UseContractWriteConfig);
-    }
-  };
-
   return (
     <div className="grow relative h-screen overflow-hidden">
       <Toaster />
@@ -272,13 +261,7 @@ export default function Page() {
           <div className="max-w-lg mx-auto p-12 bg-white-800 rounded-2xl shadow-2xl">
             <div className="text-center text-teal-500">
               <h2 className="text-4xl font-bold mb-4">
-                Buy
-                {chainEnv === "testnet" && (
-                  <span className={`text-teal-500`}> ${MEME_COIN_NAME}</span>
-                )}
-                {chainEnv === "mainnet" && (
-                  <span className="text-teal-500"> ${MEME_COIN_NAME}</span>
-                )}
+                Buy <span className={`text-teal-500`}> ${MEME_COIN_NAME}</span>
               </h2>
               <div className="mb-8 flex items-center justify-between">
                 <label
@@ -308,12 +291,7 @@ export default function Page() {
                 </label>
                 <label className="text-2sm font-bold mb-2 p-2 text-teal-500 text-lg">
                   {buyTokenValue * 100}
-                  {chainEnv === "testnet" && (
-                    <span className="text-teal-500"> ${MEME_COIN_SYMBOL}</span>
-                  )}
-                  {chainEnv === "mainnet" && (
-                    <span className="text-teal-500"> ${MEME_COIN_SYMBOL}</span>
-                  )}
+                  <span className="text-teal-500"> ${MEME_COIN_SYMBOL}</span>
                 </label>
               </div>
               <div className="pb-4">
